@@ -1,14 +1,28 @@
 import 'dotenv/config';
 import express from 'express';
 import { MongoClient, ObjectId } from 'mongodb';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const app = express();
 
 // --- Config ---
 const PORT = process.env.PORT || 3000;
 const MONGODB_URI = process.env.MONGODB_URI || process.env.DATABASE_URL || ''; // empty = in-memory fallback
+const NODE_ENV = process.env.NODE_ENV || 'development';
 
 app.use(express.json());
-app.use(express.static('public'));
+
+// Serve static files from React build in production
+if (NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, 'dist')));
+} else {
+  // In development, public folder is used by Vite
+  app.use(express.static('public'));
+}
 
 // --- In-memory fallback (if no DB yet) ---
 let memPosts = [];
@@ -203,6 +217,13 @@ app.get('/api/health', async (_req, res) => {
     res.status(500).json({ ok: false, error: e.message });
   }
 });
+
+// Serve React app for all non-API routes in production
+if (NODE_ENV === 'production') {
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+  });
+}
 
 app.listen(PORT, () => console.log(`Blog API listening on ${PORT}`));
 
