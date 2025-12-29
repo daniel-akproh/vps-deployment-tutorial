@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="blog.css">
+    <link href="https://fonts.googleapis.com/css2?family=Italianno&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
+        rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet" />
+    <link rel="stylesheet" href="post.css">
+
+    <script>
+        // Force scroll to top immediately
+        if (history.scrollRestoration) {
+            history.scrollRestoration = 'manual';
+        }
+    </script>
+
+    <title>Document</title>
+</head>
+
+<body>
+    <nav class="modern-nav">
+        <div class="nav-container">
+            <a href="../index.html" class="nav-logo">
+                <img src="../assets/images/logo.png" alt="">
+                <span class="site-name">SimplySharon</span>
+            </a>
+            <ul class="nav-menu">
+                <li><a href="../index.html">Home</a></li>
+                <li><a href="blogcast.html">Blogcast</a></li>
+                <li><a href="#">Make-Betters</a></li>
+                <li><a href="#">Poise</a></li>
+                <li><a href="#">About</a></li>
+                <li><a href="#">Contact</a></li>
+            </ul>
+            <div class="nav-actions">
+                <button class="login-btn" id="loginBtn">
+                    <i class="ri-user-line"></i>
+                    <span class="login-text">Login</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Breadcrumb -->
+    <div class="breadcrumb-container">
+        <div class="breadcrumb">
+            <a href="../index.html"><i class="ri-home-4-line"></i> Home</a>
+            <span class="breadcrumb-separator">/</span>
+            <span class="breadcrumb-current">Blogcast</span>
+        </div>
+    </div>
+
+    <section class="blogcast-page">
+        <div class="blogcast-page-inner">
+
+            <!-- HERO -->
+            <header class="blogcast-page-header">
+                <div class="italianno-text">The Blogcast</div>
+                <p class="intro">
+                    Every story on Simply Sharon is thoughtfully written —
+                    and brought to life through audio and video, so you can
+                    read, listen, or watch in the way that suits you best.
+                </p>
+            </header>
+
+            <!-- FORMAT EXPLANATION -->
+            <div class="blogcast-formats">
+                <div class="format">
+                    <div class="format-icon"><i class="ri-article-line"></i></div>
+                    <h3>Read</h3>
+                    <p>
+                        Reflective articles on beauty, wellness, confident aging,
+                        and living with purpose.
+                    </p>
+                </div>
+
+                <div class="format">
+                    <div class="format-icon"><i class="ri-headphone-line"></i></div>
+                    <h3>Listen</h3>
+                    <p>
+                        The same stories, voiced with warmth and intention —
+                        perfect for quiet moments or on the go.
+                    </p>
+                </div>
+
+                <div class="format">
+                    <div class="format-icon"><i class="ri-youtube-line"></i></div>
+                    <h3>Watch</h3>
+                    <p>
+                        Video Blogcasts that bring expression, presence,
+                        and connection to each message.
+                    </p>
+                </div>
+            </div>
+
+            <!-- BLOGCAST LIST -->
+            <div class="blogcast-list" id="blogcastList">
+                <!-- Posts will be loaded dynamically from database -->
+                <div style="text-align: center; padding: 3rem; color: #666;">
+                    <i class="ri-loader-4-line" style="font-size: 2rem; animation: spin 1s linear infinite;"></i>
+                    <p>Loading posts...</p>
+                </div>
+            </div>
+
+            <style>
+                @keyframes spin {
+                    from { transform: rotate(0deg); }
+                    to { transform: rotate(360deg); }
+                }
+            </style>
+
+            <!-- Pagination -->
+            <div class="pagination" id="paginationContainer">
+                <!-- Pagination will be generated dynamically -->
+            </div>
+
+        </div>
+    </section>
+
+    <footer class="site-footer">
+        <div class="footer-inner">
+
+            <div class="footer-content">
+
+                <!-- LEFT TEXT BLOCK -->
+                <div class="footer-text">
+                    <div class="italianno-text footer-title">Connect with Sharon</div>
+
+                    <div class="social-links">
+                        <a href="mailto:info@SimplySharon.ca" class="social-icon" aria-label="Email">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                                <path
+                                    d="M3 3h18a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zm17 4.238l-7.928 7.1L4 7.216V19h16V7.238zM4.511 5l7.55 6.662L19.502 5H4.511z" />
+                            </svg>
+                        </a>
+                        <a href="https://www.youtube.com/@SimplySharonTips" target="_blank" class="social-icon"
+                            aria-label="YouTube">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                                <path
+                                    d="M19.606 6.995c-.076-.298-.292-.523-.539-.592C18.63 6.28 16.5 6 12 6s-6.628.28-7.069.403c-.244.068-.46.293-.537.592C4.285 7.419 4 9.196 4 12s.285 4.58.394 5.006c.076.297.292.522.538.59C5.372 17.72 7.5 18 12 18s6.629-.28 7.069-.403c.244-.068.46-.293.537-.592C19.715 16.581 20 14.8 20 12s-.285-4.58-.394-5.005zm1.937-.497C22 8.28 22 12 22 12s0 3.72-.457 5.502c-.254.985-.997 1.76-1.938 2.022C17.896 20 12 20 12 20s-5.893 0-7.605-.476c-.945-.266-1.687-1.04-1.938-2.022C2 15.72 2 12 2 12s0-3.72.457-5.502c.254-.985.997-1.76 1.938-2.022C6.107 4 12 4 12 4s5.896 0 7.605.476c.945.266 1.687 1.04 1.938 2.022zM10 15.5v-7l6 3.5-6 3.5z" />
+                            </svg>
+                        </a>
+                        <a href="https://www.facebook.com/SharonDanleyBeauty" target="_blank" class="social-icon"
+                            aria-label="Facebook">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                                <path
+                                    d="M14 13.5h2.5l1-4H14v-2c0-1.03 0-2 2-2h1.5V2.14c-.326-.043-1.557-.14-2.857-.14C11.928 2 10 3.657 10 6.7v2.8H7v4h3V22h4v-8.5z" />
+                            </svg>
+                        </a>
+                    </div>
+
+                    <p>
+                        Email:
+                        <a href="mailto:info@SimplySharon.ca">info@SimplySharon.ca</a>
+                    </p>
+
+                    <p>
+                        YouTube:
+                        <a href="https://www.youtube.com/@SimplySharonTips" target="_blank">
+                            YouTube.com/@SimplySharonTips
+                        </a>
+                    </p>
+
+                    <p>Facebook:</p>
+
+                    <p class="indent">
+                        Private Group:
+                        <a href="https://www.facebook.com/groups/GoingGrayLovinIt" target="_blank">
+                            Facebook.com/groups/GoingGrayLovinIt
+                        </a><br>
+                        <span class="note">
+                            For biological women going gray; please confirm your agreement to the join question
+                        </span>
+                    </p>
+
+                    <p class="indent">
+                        Public Page:
+                        <a href="https://www.facebook.com/SharonDanleyBeauty" target="_blank">
+                            Facebook.com/SharonDanleyBeauty
+                        </a><br>
+                        <span class="note">
+                            For everyone, including those who've completed their gray hair journey
+                        </span>
+                    </p>
+                </div>
+
+                <!-- RIGHT IMAGE -->
+                <div class="footer-art">
+                    <img src="../assets/images/Transparent-Caricature-419x1024.png" alt="">
+                </div>
+
+            </div>
+
+            <!-- LEGAL / NOTE -->
+            <div class="footer-legal">
+                <p>
+                    Not monetized, sponsored, or compensated. Shared freely to inspire a legacy of giving
+                    in honour of my children Andrea & Matthew Main and to encourage paying it forward in your own way.
+                </p>
+
+                <p class="copyright">
+                    © 2025 Sharon Danley | All images, content and design created by Sharon Danley.
+                </p>
+            </div>
+
+        </div>
+    </footer>
+
+    <script>
+        // Ensure page loads at the top
+        window.scrollTo(0, 0);
+
+        // Force again after a tiny delay to override browser behavior
+        setTimeout(function () {
+            window.scrollTo(0, 0);
+        }, 1);
+
+        // API Configuration
+        const API_URL = window.location.hostname === 'localhost' 
+            ? 'http://localhost:3000/api' 
+            : '/api';
+
+        let currentPage = 1;
+        const postsPerPage = 6;
+
+        // Fetch and display posts from database
+        async function loadPosts(page = 1) {
+            try {
+                const response = await fetch(`${API_URL}/posts?status=Published&page=${page}&limit=${postsPerPage}`);
+                const data = await response.json();
+
+                if (data.success && data.data.length > 0) {
+                    displayPosts(data.data);
+                    displayPagination(data.pagination);
+                } else {
+                    document.getElementById('blogcastList').innerHTML = `
+                        <div style="text-align: center; padding: 3rem; color: #666;">
+                            <i class="ri-file-list-line" style="font-size: 3rem;"></i>
+                            <p style="font-size: 1.2rem; margin-top: 1rem;">No published posts yet.</p>
+                            <p>Check back soon for new content!</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading posts:', error);
+                document.getElementById('blogcastList').innerHTML = `
+                    <div style="text-align: center; padding: 3rem; color: #d32f2f;">
+                        <i class="ri-error-warning-line" style="font-size: 3rem;"></i>
+                        <p style="font-size: 1.2rem; margin-top: 1rem;">Error loading posts</p>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        function displayPosts(posts) {
+            const blogcastList = document.getElementById('blogcastList');
+            
+            blogcastList.innerHTML = posts.map(post => {
+                // Create excerpt from content (strip HTML and limit length)
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = post.content;
+                const textContent = tempDiv.textContent || tempDiv.innerText || '';
+                const excerpt = post.subtitle || textContent.substring(0, 150) + (textContent.length > 150 ? '...' : '');
+
+                // Use featured image or default
+                const imageUrl = post.featuredImage || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&h=400&fit=crop';
+
+                return `
+                    <article class="blogcast-entry">
+                        <div class="entry-image">
+                            <img src="${imageUrl}" alt="${post.title}">
+                        </div>
+                        <div class="entry-content">
+                            <h2>${post.title}</h2>
+                            <p class="entry-excerpt">${excerpt}</p>
+                            <div class="entry-meta" style="font-size: 0.85rem; color: #666; margin: 0.5rem 0;">
+                                <span><i class="ri-calendar-line"></i> ${new Date(post.publishDate).toLocaleDateString()}</span>
+                                <span style="margin-left: 1rem;"><i class="ri-price-tag-3-line"></i> ${post.category}</span>
+                            </div>
+                            <div class="entry-actions">
+                                <a href="post-detail.html?id=${post._id}" class="entry-btn"><i class="ri-article-line"></i> Read</a>
+                                <a href="#" class="entry-btn"><i class="ri-headphone-line"></i> Listen</a>
+                                <a href="#" class="entry-btn"><i class="ri-youtube-line"></i> Watch</a>
+                            </div>
+                        </div>
+                    </article>
+                `;
+            }).join('');
+        }
+
+        function displayPagination(pagination) {
+            if (!pagination || pagination.pages <= 1) {
+                document.getElementById('paginationContainer').style.display = 'none';
+                return;
+            }
+
+            const container = document.getElementById('paginationContainer');
+            container.style.display = 'flex';
+
+            let paginationHTML = `
+                <button class="pagination-btn prev" ${pagination.page === 1 ? 'disabled' : ''} onclick="changePage(${pagination.page - 1})">
+                    <i class="ri-arrow-left-s-line"></i> Previous
+                </button>
+                <div class="pagination-numbers">
+            `;
+
+            for (let i = 1; i <= pagination.pages; i++) {
+                paginationHTML += `
+                    <span class="page-number ${i === pagination.page ? 'active' : ''}" onclick="changePage(${i})">${i}</span>
+                `;
+            }
+
+            paginationHTML += `
+                </div>
+                <button class="pagination-btn next" ${pagination.page === pagination.pages ? 'disabled' : ''} onclick="changePage(${pagination.page + 1})">
+                    Next <i class="ri-arrow-right-s-line"></i>
+                </button>
+            `;
+
+            container.innerHTML = paginationHTML;
+        }
+
+        function changePage(page) {
+            currentPage = page;
+            loadPosts(page);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Load posts on page load
+        loadPosts();
+
+        // Login functionality
+        const loginBtn = document.getElementById('loginBtn');
+        const loginText = loginBtn.querySelector('.login-text');
+        const isLoggedIn = sessionStorage.getItem('isLoggedIn') === 'true';
+
+        if (isLoggedIn) {
+            loginText.textContent = 'Sharon D.';
+            loginBtn.classList.add('logged-in');
+        }
+
+        loginBtn.addEventListener('click', () => {
+            if (isLoggedIn) {
+                window.location.href = '../dashboard/admin.html';
+            } else {
+                sessionStorage.setItem('isLoggedIn', 'true');
+                loginText.textContent = 'Sharon D.';
+                loginBtn.classList.add('logged-in');
+            }
+        });
+
+        // AI Chat functionality
+        const askAiBtn = document.getElementById('askAiBtn');
+        const aiChatPanel = document.getElementById('aiChatPanel');
+        const closeChatBtn = document.getElementById('closeChatBtn');
+        const chatInput = document.getElementById('chatInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const chatMessages = document.getElementById('chatMessages');
+
+        askAiBtn.addEventListener('click', () => {
+            aiChatPanel.classList.add('active');
+            chatInput.focus();
+        });
+
+        closeChatBtn.addEventListener('click', () => {
+            aiChatPanel.classList.remove('active');
+        });
+
+        function sendMessage() {
+            const message = chatInput.value.trim();
+            if (message) {
+                // Add user message
+                const userMessageDiv = document.createElement('div');
+                userMessageDiv.className = 'user-message';
+                userMessageDiv.innerHTML = `
+                    <div class=\"message-content\">
+                        <p>${message}</p>
+                    </div>
+                    <div class=\"message-avatar\">
+                        <i class=\"ri-user-line\"></i>
+                    </div>
+                `;
+                chatMessages.appendChild(userMessageDiv);
+
+                // Clear input
+                chatInput.value = '';
+
+                // Simulate AI response
+                setTimeout(() => {
+                    const aiMessageDiv = document.createElement('div');
+                    aiMessageDiv.className = 'ai-message';
+                    aiMessageDiv.innerHTML = `
+                        <div class=\"message-avatar\">
+                            <i class=\"ri-robot-line\"></i>
+                        </div>
+                        <div class=\"message-content\">
+                            <p>Thank you for your question. I'm processing your request about "${message}". This is a simulated response - in production, this would connect to a real AI service.</p>
+                        </div>
+                    `;
+                    chatMessages.appendChild(aiMessageDiv);
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                }, 1000);
+
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+        }
+
+        sendBtn.addEventListener('click', sendMessage);
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    </script>
+
+</body>
+
+</html>

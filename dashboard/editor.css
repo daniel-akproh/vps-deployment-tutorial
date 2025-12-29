@@ -1,0 +1,374 @@
+/* Editor Layout */
+.editor-content {
+    background: #f5f7fa;
+    min-height: calc(100vh - 150px);
+}
+
+.editor-wrapper {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+/* Editor Header */
+.editor-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.editor-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.btn-secondary {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: white;
+    color: #555;
+    border: 2px solid #ddd;
+    padding: 0.9rem 1.8rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+    border-color: #999;
+    background: #f8f9fa;
+}
+
+/* Editor Layout */
+.editor-layout {
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: 2rem;
+}
+
+.editor-main {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+/* Post Title & Subtitle */
+.post-title {
+    width: 100%;
+    border: none;
+    font-size: 2.5rem;
+    font-weight: 700;
+    padding: 1rem 0;
+    margin-bottom: 0.5rem;
+    outline: none;
+    font-family: 'Inter', sans-serif;
+}
+
+.post-subtitle {
+    width: 100%;
+    border: none;
+    font-size: 1.5rem;
+    font-weight: 400;
+    color: #666;
+    padding: 0.5rem 0;
+    margin-bottom: 2rem;
+    outline: none;
+    border-bottom: 2px solid #f0f0f0;
+    font-family: 'Inter', sans-serif;
+}
+
+/* Toolbar */
+.editor-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.toolbar-group {
+    display: flex;
+    gap: 0.3rem;
+}
+
+.toolbar-btn {
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: white;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    font-size: 1.1rem;
+    color: #555;
+}
+
+.toolbar-btn:hover {
+    background: #667eea;
+    color: white;
+    transform: translateY(-1px);
+}
+
+.toolbar-select {
+    padding: 0.5rem 1rem;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background: white;
+    cursor: pointer;
+    font-size: 0.9rem;
+    outline: none;
+}
+
+.toolbar-divider {
+    width: 1px;
+    height: 24px;
+    background: #ddd;
+    margin: 0 0.5rem;
+}
+
+.color-picker {
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    padding: 2px;
+}
+
+/* Content Editor */
+.content-editor {
+    min-height: 600px;
+    padding: 2rem;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    outline: none;
+    font-size: 1.1rem;
+    line-height: 1.8;
+    font-family: 'Inter', sans-serif;
+}
+
+.content-editor:focus {
+    border-color: #667eea;
+}
+
+.content-editor h1 {
+    font-size: 2.5rem;
+    margin: 1.5rem 0 1rem 0;
+}
+
+.content-editor h2 {
+    font-size: 2rem;
+    margin: 1.3rem 0 0.8rem 0;
+}
+
+.content-editor h3 {
+    font-size: 1.6rem;
+    margin: 1.2rem 0 0.7rem 0;
+}
+
+.content-editor h4 {
+    font-size: 1.3rem;
+    margin: 1rem 0 0.6rem 0;
+}
+
+.content-editor p {
+    margin: 1rem 0;
+}
+
+.content-editor blockquote {
+    border-left: 4px solid #667eea;
+    padding: 1rem 1.5rem;
+    margin: 1.5rem 0;
+    background: #f8f9fa;
+    font-style: italic;
+}
+
+.content-editor ul,
+.content-editor ol {
+    padding-left: 2rem;
+    margin: 1rem 0;
+}
+
+.content-editor li {
+    margin: 0.5rem 0;
+}
+
+.content-editor pre {
+    background: #2d2d2d;
+    color: #f8f8f2;
+    padding: 1.5rem;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin: 1.5rem 0;
+    font-family: 'Courier New', monospace;
+}
+
+.content-editor img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    margin: 1.5rem 0;
+}
+
+.content-editor a {
+    color: #667eea;
+    text-decoration: underline;
+}
+
+/* Sidebar */
+.editor-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.sidebar-section {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.sidebar-section h3 {
+    font-size: 1.1rem;
+    margin-bottom: 1.2rem;
+    color: #333;
+}
+
+.setting-item {
+    margin-bottom: 1.2rem;
+}
+
+.setting-item:last-child {
+    margin-bottom: 0;
+}
+
+.setting-item label {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #555;
+    margin-bottom: 0.5rem;
+}
+
+.setting-item small {
+    display: block;
+    font-size: 0.8rem;
+    color: #999;
+    margin-top: 0.3rem;
+}
+
+.setting-select,
+.setting-input,
+.setting-textarea {
+    width: 100%;
+    padding: 0.7rem;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    outline: none;
+    font-family: 'Inter', sans-serif;
+}
+
+.setting-select:focus,
+.setting-input:focus,
+.setting-textarea:focus {
+    border-color: #667eea;
+}
+
+.setting-textarea {
+    resize: vertical;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    cursor: pointer;
+    font-weight: normal !important;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+/* Image Upload */
+.image-upload {
+    cursor: pointer;
+}
+
+.upload-placeholder {
+    width: 100%;
+    height: 200px;
+    border: 2px dashed #ddd;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+    background-size: cover;
+    background-position: center;
+}
+
+.upload-placeholder:hover {
+    border-color: #667eea;
+    background-color: #f8f9fa;
+}
+
+.upload-placeholder span {
+    font-size: 3rem;
+}
+
+.upload-placeholder p {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .editor-layout {
+        grid-template-columns: 1fr;
+    }
+    
+    .editor-sidebar {
+        order: 2;
+    }
+}
+
+@media (max-width: 768px) {
+    .editor-toolbar {
+        justify-content: flex-start;
+    }
+    
+    .toolbar-group {
+        flex-wrap: wrap;
+    }
+    
+    .post-title {
+        font-size: 1.8rem;
+    }
+    
+    .post-subtitle {
+        font-size: 1.2rem;
+    }
+    
+    .content-editor {
+        font-size: 1rem;
+        padding: 1rem;
+    }
+}
