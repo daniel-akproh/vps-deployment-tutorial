@@ -3,73 +3,251 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>VPS Fetch/Write Demo</title>
+  <title>Blog CRUD Demo - VPS Tutorial</title>
   <style>
-    body{font-family:system-ui,Arial;padding:2rem;max-width:760px;margin:auto;line-height:1.5}
-    .card{padding:1rem;border:1px solid #ddd;border-radius:12px;margin:1rem 0}
+    body{font-family:system-ui,Arial;padding:2rem;max-width:900px;margin:auto;line-height:1.5;background:#f5f5f5}
+    h1{color:#333}
+    .card{padding:1.5rem;border:1px solid #ddd;border-radius:12px;margin:1rem 0;background:white;box-shadow:0 2px 4px rgba(0,0,0,0.05)}
     .row{margin:.75rem 0}
-    button{padding:.6rem 1rem;cursor:pointer}
-    .ok{color:green}.err{color:#b00020}
-    pre{background:#fafafa;border:1px solid #eee;padding:1rem;border-radius:8px;overflow:auto}
+    label{display:block;margin-bottom:0.3rem;font-weight:600;color:#555}
+    input,textarea{width:100%;padding:.6rem;border:1px solid #ccc;border-radius:6px;font-family:inherit;box-sizing:border-box}
+    textarea{min-height:100px;resize:vertical}
+    button{padding:.7rem 1.2rem;cursor:pointer;background:#007bff;color:white;border:none;border-radius:6px;font-weight:600;margin-right:0.5rem;margin-top:0.5rem}
+    button:hover{background:#0056b3}
+    button.danger{background:#dc3545}
+    button.danger:hover{background:#a71d2a}
+    button.secondary{background:#6c757d}
+    button.secondary:hover{background:#545b62}
+    .ok{color:green;font-weight:600}.err{color:#b00020;font-weight:600}
+    .post-item{padding:1rem;margin:0.5rem 0;border:1px solid #e0e0e0;border-radius:8px;background:#fafafa}
+    .post-item h4{margin:0 0 0.5rem 0;color:#333}
+    .post-meta{font-size:0.85rem;color:#666;margin:0.3rem 0}
+    .post-content{margin:0.5rem 0;color:#444}
+    .post-actions{margin-top:0.5rem}
+    #status{padding:0.8rem;border-radius:6px;margin:1rem 0;font-weight:600}
+    .hidden{display:none}
   </style>
-<script defer src="https://analytics.hey.navy/script.js" data-website-id="ecaaca27-8f63-40ee-9773-db36138fdffb"></script>
 </head>
 <body>
-  <h1>VPS Fetch/Write Demo</h1>
-  <p>This page is served by Node.js on your VPS. Use the buttons to call real API routes.</p>
+  <h1>📝 Blog CRUD Demo</h1>
+  <p>Test full CRUD operations (Create, Read, Update, Delete) with PostgreSQL on your VPS.</p>
+  
+  <div id="status" class="hidden"></div>
+
+  <!-- CREATE -->
   <div class="card">
-    <h3>Read: Fetch Data (GET)</h3>
+    <h3>➕ Create New Blog Post</h3>
     <div class="row">
-      <button id="getBtn">Fetch Data</button>
-      <span id="getMsg"></span>
+      <label>Title</label>
+      <input type="text" id="newTitle" placeholder="Enter post title">
+    </div>
+    <div class="row">
+      <label>Content</label>
+      <textarea id="newContent" placeholder="Write your blog post content..."></textarea>
+    </div>
+    <div class="row">
+      <label>Author</label>
+      <input type="text" id="newAuthor" placeholder="Your name">
+    </div>
+    <div class="row">
+      <button onclick="createPost()">Create Post</button>
     </div>
   </div>
+
+  <!-- READ ALL -->
   <div class="card">
-    <h3>Write: Save an Event (POST)</h3>
+    <h3>📖 All Blog Posts</h3>
+    <button onclick="loadPosts()">Refresh Posts</button>
+    <div id="postsList">Loading...</div>
+  </div>
+
+  <!-- UPDATE (hidden until editing) -->
+  <div class="card hidden" id="editCard">
+    <h3>✏️ Edit Post</h3>
+    <input type="hidden" id="editId">
     <div class="row">
-      <button id="writeBtn">Write Data</button>
-      <span id="writeMsg"></span>
+      <label>Title</label>
+      <input type="text" id="editTitle">
+    </div>
+    <div class="row">
+      <label>Content</label>
+      <textarea id="editContent"></textarea>
+    </div>
+    <div class="row">
+      <label>Author</label>
+      <input type="text" id="editAuthor">
+    </div>
+    <div class="row">
+      <button onclick="updatePost()">Save Changes</button>
+      <button class="secondary" onclick="cancelEdit()">Cancel</button>
     </div>
   </div>
+
+  <!-- HEALTH CHECK -->
   <div class="card">
-    <h3>Metrics (Live)</h3>
-    <pre id="metricsBox">Loading…</pre>
+    <h3>🏥 System Health</h3>
+    <button onclick="checkHealth()">Check Status</button>
+    <pre id="healthBox" style="background:#f9f9f9;padding:1rem;border-radius:6px;margin-top:1rem">Click button to check</pre>
   </div>
+
 <script>
-const $ = (id)=>document.getElementById(id);
-async function getJSON(url, opts){ const r=await fetch(url,opts); if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }
-$('getBtn').onclick = async () => {
+const $ = (id) => document.getElementById(id);
+const API = '/api/posts';
+
+async function req(url, opts) {
+  const r = await fetch(url, {
+    headers: { 'Content-Type': 'application/json' },
+    ...opts
+  });
+  const data = await r.json();
+  if (!r.ok) throw new Error(data.error || 'Request failed');
+  return data;
+}
+
+function showStatus(msg, isError = false) {
+  const status = $('status');
+  status.textContent = msg;
+  status.className = isError ? 'err card' : 'ok card';
+  setTimeout(() => status.className = 'hidden', 4000);
+}
+
+// CREATE
+async function createPost() {
   try {
-    const data = await getJSON('/api/time');
-    $('getMsg').textContent = 'Server time: ' + data.time;
-    $('getMsg').className = 'ok';
-    window.umami?.track('fetch_data');
-  } catch {
-    $('getMsg').textContent = 'Error';
-    $('getMsg').className = 'err';
-  }
-};
-$('writeBtn').onclick = async () => {
-  try {
-    const data = await getJSON('/api/demo-write', { method:'POST' });
-    $('writeMsg').textContent = 'Writes so far: ' + data.total;
-    $('writeMsg').className = 'ok';
-    window.umami?.track('write_data');
-    loadMetrics();
-  } catch {
-    $('writeMsg').textContent = 'Error';
-    $('writeMsg').className = 'err';
-  }
-};
-async function loadMetrics(){
-  try {
-    const m = await getJSON('/api/metrics');
-    $('metricsBox').textContent = JSON.stringify(m, null, 2);
-  } catch {
-    $('metricsBox').textContent = 'Error loading metrics';
+    const title = $('newTitle').value.trim();
+    const content = $('newContent').value.trim();
+    const author = $('newAuthor').value.trim();
+    
+    if (!title || !content || !author) {
+      showStatus('Please fill all fields', true);
+      return;
+    }
+
+    await req(API, {
+      method: 'POST',
+      body: JSON.stringify({ title, content, author })
+    });
+
+    $('newTitle').value = '';
+    $('newContent').value = '';
+    $('newAuthor').value = '';
+    
+    showStatus('✅ Post created successfully!');
+    loadPosts();
+  } catch (e) {
+    showStatus('❌ Error: ' + e.message, true);
   }
 }
-loadMetrics();
+
+// READ ALL
+async function loadPosts() {
+  try {
+    const data = await req(API);
+    const posts = data.posts;
+    
+    if (posts.length === 0) {
+      $('postsList').innerHTML = '<p style="color:#999;margin-top:1rem">No posts yet. Create one above!</p>';
+      return;
+    }
+
+    $('postsList').innerHTML = posts.map(post => {
+      const postId = post._id || post.id; // MongoDB uses _id, fallback uses id
+      return `
+        <div class="post-item">
+          <h4>${escapeHtml(post.title)}</h4>
+          <div class="post-meta">By ${escapeHtml(post.author)} | Created: ${new Date(post.created_at).toLocaleString()}</div>
+          <div class="post-content">${escapeHtml(post.content)}</div>
+          <div class="post-actions">
+            <button class="secondary" onclick="editPost('${postId}')">Edit</button>
+            <button class="danger" onclick="deletePost('${postId}')">Delete</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  } catch (e) {
+    $('postsList').innerHTML = '<p class="err">Error loading posts: ' + e.message + '</p>';
+  }
+}
+
+// UPDATE
+async function editPost(id) {
+  try {
+    const data = await req(`${API}/${id}`);
+    const post = data.post;
+    
+    $('editId').value = post._id || post.id; // MongoDB uses _id, fallback uses id
+    $('editTitle').value = post.title;
+    $('editContent').value = post.content;
+    $('editAuthor').value = post.author;
+    
+    $('editCard').classList.remove('hidden');
+    $('editCard').scrollIntoView({ behavior: 'smooth' });
+  } catch (e) {
+    showStatus('❌ Error loading post: ' + e.message, true);
+  }
+}
+
+async function updatePost() {
+  try {
+    const id = $('editId').value;
+    const title = $('editTitle').value.trim();
+    const content = $('editContent').value.trim();
+    const author = $('editAuthor').value.trim();
+
+    if (!title || !content || !author) {
+      showStatus('Please fill all fields', true);
+      return;
+    }
+
+    await req(`${API}/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify({ title, content, author })
+    });
+
+    cancelEdit();
+    showStatus('✅ Post updated successfully!');
+    loadPosts();
+  } catch (e) {
+    showStatus('❌ Error: ' + e.message, true);
+  }
+}
+
+function cancelEdit() {
+  $('editCard').classList.add('hidden');
+}
+
+// DELETE
+async function deletePost(id) {
+  if (!confirm('Are you sure you want to delete this post?')) return;
+  
+  try {
+    await req(`${API}/${id}`, { method: 'DELETE' });
+    showStatus('✅ Post deleted successfully!');
+    loadPosts();
+  } catch (e) {
+    showStatus('❌ Error: ' + e.message, true);
+  }
+}
+
+// HEALTH CHECK
+async function checkHealth() {
+  try {
+    const data = await req('/api/health');
+    $('healthBox').textContent = JSON.stringify(data, null, 2);
+  } catch (e) {
+    $('healthBox').textContent = 'Error: ' + e.message;
+  }
+}
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// Load posts on page load
+loadPosts();
+checkHealth();
 </script>
 </body>
 </html>

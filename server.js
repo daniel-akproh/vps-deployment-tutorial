@@ -1,80 +1,210 @@
+import 'dotenv/config';
 import express from 'express';
-import pkg from 'pg';
-const { Pool } = pkg;
+import { MongoClient, ObjectId } from 'mongodb';
 const app = express();
+
 // --- Config ---
 const PORT = process.env.PORT || 3000;
-const DATABASE_URL = process.env.DATABASE_URL || ''; // empty = in-memory fallback
+const MONGODB_URI = process.env.MONGODB_URI || process.env.DATABASE_URL || ''; // empty = in-memory fallback
+
 app.use(express.json());
 app.use(express.static('public'));
+
 // --- In-memory fallback (if no DB yet) ---
-let mem = { pageViews: 0, writes: 0 };
-// --- Optional Postgres pool ---
-let pool = null;
-if (DATABASE_URL) {
-  pool = new Pool({ connectionString: DATABASE_URL, ssl: sslOption(DATABASE_URL) });
+let memPosts = [];
+let memIdCounter = 1;
+
+// --- MongoDB connection ---
+let db = null;
+let postsCollection = null;
+
+if (MONGODB_URI) {
+  const client = new MongoClient(MONGODB_URI);
   (async () => {
     try {
-      await pool.query(`
-        CREATE TABLE IF NOT EXISTS pageviews(id SERIAL PRIMARY KEY, at TIMESTAMP DEFAULT NOW());
-        CREATE TABLE IF NOT EXISTS writes(id SERIAL PRIMARY KEY, at TIMESTAMP DEFAULT NOW());
-      `);
-      console.log('DB ready');
+      await client.connect();
+      db = client.db(); // Uses database from connection string
+      postsCollection = db.collection('blog_posts');
+      
+      // Create indexes for better performance
+      await postsCollection.createIndex({ created_at: -1 });
+      
+      console.log('MongoDB connected and ready');
     } catch (e) {
-      console.error('DB init error:', e.message);
-      pool = null; // fall back to memory if DB init fails
+      console.error('MongoDB connection error:', e.message);
+      db = null;
+      postsCollection = null;
     }
   })();
 }
-function sslOption(cs) {
-  // Some hosted Postgres providers require SSL
-  return /amazonaws|render|railway|supabase|azure|gcp|neon|timescale|heroku/i.test(cs)
-    ? { rejectUnauthorized: false }
-    : undefined;
-}
-// --- Count a page view on homepage load ---
-app.get('/', async (_req, _res, next) => {
+
+// ========== BLOG CRUD API ENDPOINTS ==========
+
+// CREATE: Add a new blog post
+app.post('/api/posts', async (req, res) => {
   try {
-    if (pool) await pool.query('INSERT INTO pageviews DEFAULT VALUES;');
-    else mem.pageViews++;
-  } catch {}
-  next();
-});
-// --- Demo endpoints ---
-// GET: simple dynamic read
-app.get('/api/time', (_req, res) => {
-  res.json({ ok: true, time: new Date().toISOString() });
-});
-// POST: demo write (increments a counter)
-app.post('/api/demo-write', async (_req, res) => {
-  try {
-    if (pool) {
-      await pool.query('INSERT INTO writes DEFAULT VALUES;');
-      const total = (await pool.query('SELECT COUNT(*)::int AS n FROM writes')).rows[0].n;
-      return res.json({ ok: true, total });
+    const { title, content, author } = req.body;
+    
+    if (!title || !content || !author) {
+      return res.status(400).json({ ok: false, error: 'Title, content, and author are required' });
+    }
+
+    if (postsCollection) {
+      const newPost = {
+        title,
+        content,
+        author,
+        created_at: new Date(),
+        updated_at: new Date()
+      };
+      const result = await postsCollection.insertOne(newPost);
+      newPost._id = result.insertedId;
+      return res.json({ ok: true, post: newPost });
     } else {
-      mem.writes++;
-      return res.json({ ok: true, total: mem.writes });
+      const newPost = {
+        id: memIdCounter++,
+        title,
+        content,
+        author,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+      memPosts.push(newPost);
+      return res.json({ ok: true, post: newPost });
     }
   } catch (e) {
     res.status(500).json({ ok: false, error: e.message });
   }
 });
-// Expose simple metrics (handy while filming)
-app.get('/api/metrics', async (_req, res) => {
+
+// READ: Get all blog posts
+app.get('/api/posts', async (_req, res) => {
   try {
-    if (pool) {
-      const pv = (await pool.query('SELECT COUNT(*)::int AS n FROM pageviews')).rows[0].n;
-      const wr = (await pool.query('SELECT COUNT(*)::int AS n FROM writes')).rows[0].n;
-      res.json({ pageViews: pv, writes: wr, db: true });
+    if (postsCollection) {
+      const posts = await postsCollection.find().sort({ created_at: -1 }).toArray();
+      return res.json({ ok: true, posts });
     } else {
-      res.json({ pageViews: mem.pageViews, writes: mem.writes, db: false });
+      return res.json({ ok: true, posts: memPosts.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)) });
     }
   } catch (e) {
     res.status(500).json({ ok: false, error: e.message });
   }
 });
-app.listen(PORT, () => console.log(`Listening on ${PORT}`));
+
+// READ: Get a single blog post by ID
+app.get('/api/posts/:id', async (req, res) => {
+  try {
+    const id = req.params.id;
+    
+    if (postsCollection) {
+      if (!ObjectId.isValid(id)) {
+        return res.status(400).json({ ok: false, error: 'Invalid post ID' });
+      }
+      const post = await postsCollection.findOne({ _id: new ObjectId(id) });
+      if (!post) {
+        return res.status(404).json({ ok: false, error: 'Post not found' });
+      }
+      return res.json({ ok: true, post });
+    } else {
+      const numId = parseInt(id);
+      const post = memPosts.find(p => p.id === numId);
+      if (!post) {
+        return res.status(404).json({ ok: false, error: 'Post not found' });
+      }
+      return res.json({ ok: true, post });
+    }
+  } catch (e) {
+    res.status(500).json({ ok: false, error: e.message });
+  }
+});
+
+// UPDATE: Update an existing blog post
+app.put('/api/posts/:id', async (req, res) => {
+  try {
+    const id = req.params.id;
+    const { title, content, author } = req.body;
+
+    if (!title || !content || !author) {
+      return res.status(400).json({ ok: false, error: 'Title, content, and author are required' });
+    }
+
+    if (postsCollection) {
+      if (!ObjectId.isValid(id)) {
+        return res.status(400).json({ ok: false, error: 'Invalid post ID' });
+      }
+      const result = await postsCollection.findOneAndUpdate(
+        { _id: new ObjectId(id) },
+        { $set: { title, content, author, updated_at: new Date() } },
+        { returnDocument: 'after' }
+      );
+      if (!result) {
+        return res.status(404).json({ ok: false, error: 'Post not found' });
+      }
+      return res.json({ ok: true, post: result });
+    } else {
+      const numId = parseInt(id);
+      const postIndex = memPosts.findIndex(p => p.id === numId);
+      if (postIndex === -1) {
+        return res.status(404).json({ ok: false, error: 'Post not found' });
+      }
+      memPosts[postIndex] = {
+        ...memPosts[postIndex],
+        title,
+        content,
+        author,
+        updated_at: new Date().toISOString()
+      };
+      return res.json({ ok: true, post: memPosts[postIndex] });
+    }
+  } catch (e) {
+    res.status(500).json({ ok: false, error: e.message });
+  }
+});
+
+// DELETE: Remove a blog post
+app.delete('/api/posts/:id', async (req, res) => {
+  try {
+    const id = req.params.id;
+
+    if (postsCollection) {
+      if (!ObjectId.isValid(id)) {
+        return res.status(400).json({ ok: false, error: 'Invalid post ID' });
+      }
+      const result = await postsCollection.findOneAndDelete({ _id: new ObjectId(id) });
+      if (!result) {
+        return res.status(404).json({ ok: false, error: 'Post not found' });
+      }
+      return res.json({ ok: true, message: 'Post deleted', post: result });
+    } else {
+      const numId = parseInt(id);
+      const postIndex = memPosts.findIndex(p => p.id === numId);
+      if (postIndex === -1) {
+        return res.status(404).json({ ok: false, error: 'Post not found' });
+      }
+      const deletedPost = memPosts.splice(postIndex, 1)[0];
+      return res.json({ ok: true, message: 'Post deleted', post: deletedPost });
+    }
+  } catch (e) {
+    res.status(500).json({ ok: false, error: e.message });
+  }
+});
+
+// Health check
+app.get('/api/health', async (_req, res) => {
+  try {
+    if (postsCollection) {
+      await db.admin().ping();
+      const count = await postsCollection.countDocuments();
+      res.json({ ok: true, db: 'MongoDB connected', totalPosts: count });
+    } else {
+      res.json({ ok: true, db: 'in-memory', totalPosts: memPosts.length });
+    }
+  } catch (e) {
+    res.status(500).json({ ok: false, error: e.message });
+  }
+});
+
+app.listen(PORT, () => console.log(`Blog API listening on ${PORT}`));
 
 
 
